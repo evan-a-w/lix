@@ -16,6 +16,21 @@
     gvfs
   ];
 
+  # Extra SSDs (nofail: boot carries on if one is missing or fails to mount)
+  # TEAM 2TB, ext4
+  fileSystems."/mnt/data" = {
+    device = "/dev/disk/by-uuid/aabeb877-3307-42ad-bfca-4f27bfe573e1";
+    fsType = "ext4";
+    options = ["nofail" "x-systemd.device-timeout=10s"];
+  };
+
+  # TEAM 2TB, Windows (NTFS)
+  fileSystems."/mnt/windows" = {
+    device = "/dev/disk/by-uuid/8694672C94671E45";
+    fsType = "ntfs3";
+    options = ["nofail" "x-systemd.device-timeout=10s" "uid=1000" "gid=100" "umask=022"];
+  };
+
   boot.loader.systemd-boot.enable = false;
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "nodev";
