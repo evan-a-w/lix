@@ -96,5 +96,24 @@
     ];
   };
 
+  # connect to my smb share through netbird ip
+  fileSystems."/mnt/share" = {
+    device = "//100.87.55.150/share";
+    fsType = "cifs";
+    options = [
+      "uid=1000"
+      "gid=100"
+      "vers=3.1.1"
+      "_netdev"
+      # mount on first access, so boot won't hang if NetBird isn't up yet
+      "noauto"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=60"
+      "x-systemd.device-timeout=5s"
+      "x-systemd.mount-timeout=5s"
+      "x-systemd.after=netbird.service"
+    ];
+  };
+
   system.stateVersion = "24.11";
 }
