@@ -101,10 +101,13 @@
     device = "//100.87.55.150/share";
     fsType = "cifs";
     options = [
+      # file with username=/password= lines (chmod 600, not in the repo)
+      "credentials=/etc/nixos/smb-secrets"
       "uid=1000"
       "gid=100"
       "vers=3.1.1"
       "_netdev"
+      "nofail"
       # mount on first access, so boot won't hang if NetBird isn't up yet
       "noauto"
       "x-systemd.automount"
