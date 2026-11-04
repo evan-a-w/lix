@@ -34,6 +34,11 @@
     modesetting.enable = true;
   };
 
+  # `gamemoderun %command%` in Steam launch options: performance CPU governor
+  # and higher priority while a game runs.
+  programs.gamemode.enable = true;
+  users.users.evan.extraGroups = ["gamemode"];
+
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;
