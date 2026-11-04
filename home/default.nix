@@ -34,7 +34,7 @@ in {
     {
       "lloyd@desktop" = mkHome "x86_64-linux" [./users/lloyd/desktop.nix];
       "lloyd@laptop" = mkHome "x86_64-linux" [./users/lloyd/laptop.nix];
-      "evan@crivan" = mkHome "x86_64-linux" [./users/evan/desktop.nix];
+      "evan@server-crivan" = mkHome "x86_64-linux" [./users/evan/desktop.nix];
     }
     // servers;
 }
