@@ -10,6 +10,7 @@
     ../../modules/wayland-fixes.nix
     ../../modules/common.nix
     ./shell.nix
+    ./emacs.nix
   ];
 
   # GNOME desktop (no niri gui module / gammastep)

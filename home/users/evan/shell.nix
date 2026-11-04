@@ -17,6 +17,4 @@
     enableZshIntegration = true;
     nix-direnv.enable = true;
   };
-
-  home.file.".spacemacs".source = ./spacemacs;
 }

@@ -70,7 +70,6 @@ This function should only modify configuration layer settings."
      (ocaml :variables ocaml-format-on-save t)
      (python :variables python-formatter 'yapf)
      rust
-     zig
      eww
      yaml
      sql
@@ -87,7 +86,7 @@ This function should only modify configuration layer settings."
    ;; `:location' property: '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages
-   '()
+   '(envrc)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -590,7 +589,10 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  (setq shell-file-name "/bin/zsh")
+  (setq shell-file-name (or (executable-find "zsh") shell-file-name))
+
+  ;; Per-buffer direnv environments (flake dev shells via nix-direnv).
+  (envrc-global-mode)
 
   (setq python-shell-interpreter "python3")
   (setq python-interpreter "python3")
@@ -762,11 +764,12 @@ before packages are loaded."
     (spacemacs/declare-prefix-for-mode mode "mh" "help"))
 
   ;; Cranium review client.
-  (add-to-list 'load-path
-               (expand-file-name "~/dev/cranium/editors/spacemacs"))
-  (require 'cranium)
-  (setq cranium-executable
-        (expand-file-name "~/dev/cranium/bin/cranium"))
+  (let ((cranium-dir (expand-file-name "~/dev/cranium/editors/spacemacs")))
+    (when (file-directory-p cranium-dir)
+      (add-to-list 'load-path cranium-dir)
+      (require 'cranium)
+      (setq cranium-executable
+            (expand-file-name "~/dev/cranium/bin/cranium"))))
 
   (defun el2--formatter-command ()
     (cond
