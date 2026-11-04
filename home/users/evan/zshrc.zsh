@@ -292,3 +292,5 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && [ -d "/run/user/$(id -u)" ]; then
     export XDG_RUNTIME_DIR=/run/user/$(id -u)
     export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
 fi
+
+alias nzsh='nix-shell --run zsh'
