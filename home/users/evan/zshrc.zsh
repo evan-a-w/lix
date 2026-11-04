@@ -294,3 +294,5 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && [ -d "/run/user/$(id -u)" ]; then
 fi
 
 alias nzsh='nix-shell --run zsh'
+alias hs='nh home switch'
+alias ns='nh os switch'
