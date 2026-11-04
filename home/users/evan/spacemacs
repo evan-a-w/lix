@@ -48,8 +48,8 @@ This function should only modify configuration layer settings."
      ;; helm
      ivy
      (lsp :variables
-          lsp-rust-server 'rust-analyzer
-          cargo-process-reload-on-modify t)
+          lsp-rust-analyzer-cargo-watch-command "clippy"
+          lsp-rust-analyzer-proc-macro-enable t)
      markdown
      ;; multiple-cursors
      ;; org
@@ -69,7 +69,7 @@ This function should only modify configuration layer settings."
      zig
      (ocaml :variables ocaml-format-on-save t)
      (python :variables python-formatter 'yapf)
-     rust
+     (rust :variables rust-backend 'lsp)
      eww
      yaml
      sql
@@ -92,7 +92,14 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(flycheck-ocaml)
+   ;; OCaml goes through ocaml-lsp-server (lsp-mode) only. Merlin's emacs
+   ;; mode wants an `ocamlmerlin' binary on the global exec-path, which a
+   ;; per-project nix shell (via envrc) doesn't provide, so it broke goto.
+   dotspacemacs-excluded-packages '(flycheck-ocaml
+                                    merlin
+                                    merlin-company
+                                    merlin-eldoc
+                                    merlin-iedit)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -591,9 +598,6 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (setq shell-file-name (or (executable-find "zsh") shell-file-name))
 
-  ;; Per-buffer direnv environments (flake dev shells via nix-direnv).
-  (envrc-global-mode)
-
   (setq python-shell-interpreter "python3")
   (setq python-interpreter "python3")
 
@@ -612,6 +616,15 @@ before packages are loaded."
           (append
            (split-string-and-unquote path ":")
            exec-path)))
+
+  ;; Variables from home-manager's session (eg. RUST_SRC_PATH for
+  ;; rust-analyzer), which a GUI emacs doesn't inherit.
+  (dolist (var '("RUST_SRC_PATH"))
+    (let ((value (string-trim
+                  (shell-command-to-string
+                   (format ". ~/.zshrc; echo -n ${%s}" var)))))
+      (unless (string-empty-p value)
+        (setenv var value))))
 
   (require 'python)
 
@@ -864,7 +877,85 @@ before packages are loaded."
   (add-hook 'el2-ts-mode-hook #'lsp-deferred)
   (remove-hook 'eln-mode-hook #'lsp-deferred)
   (add-hook 'eln-mode-hook #'eln-lsp-deferred-maybe)
-  (add-hook 'tuareg-mode-hook #'lsp-deferred)
+
+  ;; ------------------------------------------------------------------
+  ;; stag (~/dev/stag): `.stag' files, language server `stag lsp'.
+  (defvar stag-mode-syntax-table
+    (let ((st (make-syntax-table)))
+      (modify-syntax-entry ?_ "w" st)
+      (modify-syntax-entry ?' "w" st)
+      (modify-syntax-entry ?\( "()1n" st)
+      (modify-syntax-entry ?* ". 23n" st)
+      (modify-syntax-entry ?\) ")(4n" st)
+      (modify-syntax-entry ?\" "\"" st)
+      st)
+    "Syntax table for `stag-mode'.")
+
+  (defvar stag-font-lock-keywords
+    `((,(regexp-opt
+         '("let" "rec" "in" "match" "with" "fun" "exception" "type" "of"
+           "module" "struct" "include" "end")
+         'symbols)
+       . font-lock-keyword-face)
+      ("\\_<let%\\(?:expect_test\\|bench\\)\\_>" . font-lock-keyword-face)
+      (,(regexp-opt '("true" "false") 'symbols) . font-lock-constant-face)
+      ("\\.<\\|>\\.\\|\\.~" . font-lock-preprocessor-face)
+      ("\\_<[A-Z][A-Za-z0-9_']*\\_>" . font-lock-type-face)
+      ("\\_<[0-9][0-9_]*\\(?:\\.[0-9_]+\\)?\\_>" . font-lock-constant-face)))
+
+  (define-derived-mode stag-mode prog-mode "Stag"
+    "Major mode for stag files."
+    :syntax-table stag-mode-syntax-table
+    (setq-local comment-start "(* ")
+    (setq-local comment-end " *)")
+    (setq-local comment-start-skip "(\\*+[ \t]*")
+    (setq-local indent-line-function #'indent-relative)
+    (setq-local font-lock-defaults '(stag-font-lock-keywords)))
+
+  (add-to-list 'auto-mode-alist '("\\.stag\\'" . stag-mode))
+
+  (defun stag-lsp-command ()
+    "`stag lsp': the build of the stag checkout the buffer is in, else
+`stag' on PATH, else the build in ~/dev/stag."
+    (let* ((exe "_build/default/driver/bin/main.exe")
+           (root (and buffer-file-name
+                      (locate-dominating-file buffer-file-name "stag-stdlib")))
+           (local (and root (expand-file-name exe root)))
+           (fallback (expand-file-name exe "~/dev/stag")))
+      (cond
+       ((and local (file-executable-p local)) (list local "lsp"))
+       ((executable-find "stag") (list "stag" "lsp"))
+       ((file-executable-p fallback) (list fallback "lsp"))
+       (t (list "stag" "lsp")))))
+
+  (with-eval-after-load 'lsp-mode
+    (add-to-list 'lsp-language-id-configuration '(stag-mode . "stag"))
+    (lsp-register-client
+     (make-lsp-client
+      :new-connection (lsp-stdio-connection #'stag-lsp-command)
+      :activation-fn (lsp-activate-on "stag")
+      :major-modes '(stag-mode)
+      :server-id 'stag-lsp)))
+
+  (defun stag-format-on-save ()
+    (add-hook 'before-save-hook
+              (lambda () (when (bound-and-true-p lsp-mode) (lsp-format-buffer)))
+              nil t))
+
+  (add-hook 'stag-mode-hook #'lsp-deferred)
+  (add-hook 'stag-mode-hook #'stag-format-on-save)
+
+  (dolist (mode '(stag-mode))
+    (spacemacs/set-leader-keys-for-major-mode mode
+      "gg" #'evan/lsp-find-definition
+      "hh" #'evan/lsp-show-type)
+    (spacemacs/declare-prefix-for-mode mode "mg" "goto")
+    (spacemacs/declare-prefix-for-mode mode "mh" "help"))
+
+  ;; Per-buffer direnv environments (nix shells / flake dev shells via
+  ;; nix-direnv), so lsp servers like ocamllsp come from the project's
+  ;; shell. Enabled last so its hook runs before the modes' lsp hooks.
+  (envrc-global-mode)
   )
 
 

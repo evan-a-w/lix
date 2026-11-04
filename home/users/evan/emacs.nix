@@ -37,6 +37,10 @@ in {
     fi
   '';
 
+  # rust-analyzer needs the std sources for completion / goto into std; nix's
+  # rustc sysroot doesn't ship them. The spacemacs config imports this too.
+  home.sessionVariables.RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+
   fonts.fontconfig.enable = true;
 
   home.packages = with pkgs; [
@@ -50,6 +54,9 @@ in {
 
     # lsp servers & formatters for the configured layers
     clang-tools # clangd + clang-format (c-c++)
+    # OCaml (ocamllsp, ocamlformat) is deliberately not here: it must match
+    # each project's compiler, so it comes from the project's nix shell via
+    # direnv (`.envrc` with `use nix` / `use flake`) and envrc in emacs.
     rust-analyzer
     rustfmt
     clippy
