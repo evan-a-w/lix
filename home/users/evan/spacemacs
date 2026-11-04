@@ -48,6 +48,9 @@ This function should only modify configuration layer settings."
      ;; helm
      ivy
      (lsp :variables
+          ;; lsp-mode defaults to `opam exec -- ocamllsp'; ocamllsp comes
+          ;; from the project's nix shell (envrc) instead.
+          lsp-ocaml-lsp-server-command '("ocamllsp")
           lsp-rust-analyzer-cargo-watch-command "clippy"
           lsp-rust-analyzer-proc-macro-enable t)
      markdown
@@ -491,7 +494,7 @@ It should only modify the values of Spacemacs settings."
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'.
    ;; (default '("rg" "ag" "pt" "ack" "grep"))
-   dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
+   dotspacemacs-search-tools '("rg" "ag" "ack" "grep")
 
    ;; Format specification for setting the frame title.
    ;; %a - the `abbreviated-file-name', or `buffer-name'
@@ -648,8 +651,12 @@ before packages are loaded."
       (call-interactively #'spacemacs/merlin-locate))
      ((and (bound-and-true-p merlin-mode) (fboundp 'merlin-locate))
       (call-interactively #'merlin-locate))
+     ;; Spacemacs' jump handlers (dumb-jump etc.), without xref's prompt.
+     ((fboundp 'spacemacs/jump-to-definition)
+      (call-interactively #'spacemacs/jump-to-definition))
      ((fboundp 'xref-find-definitions)
-      (call-interactively #'xref-find-definitions))
+      (xref-find-definitions
+       (xref-backend-identifier-at-point (xref-find-backend))))
      (t
       (user-error "No definition command available"))))
 
