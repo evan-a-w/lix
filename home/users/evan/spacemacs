@@ -64,9 +64,6 @@ This function should only modify configuration layer settings."
      (c-c++ :variables c-c++-backend 'lsp-clangd c-c++-enable-clang-format-on-save t)
      javascript
      java
-     (haskell :variables haskell-completion-backend
-              'lsp haskell-process-suggest-remove-import-lines nil
-              lsp-haskell-process-path-hie "haskell-language-server-wrapper")
 
      html
      zig
@@ -979,13 +976,13 @@ This function is called at the very end of Spacemacs initialization."
    ;; Your init file should contain only one such instance.
    ;; If there is more than one, they won't work right.
    '(package-selected-packages
-     '(ace-link aggressive-indent all-the-icons async attrap auto-compile
+     '(ace-link aggressive-indent all-the-icons async auto-compile
                 auto-highlight-symbol auto-yasnippet blacken browse-at-remote ccls
-                centered-cursor-mode clean-aindent-mode cmm-mode code-cells
+                centered-cursor-mode clean-aindent-mode code-cells
                 column-enforce-mode company-anaconda company-c-headers
                 company-cabal company-coq company-rtags company-web company-ycmd
                 counsel-css counsel-projectile cpp-auto-include
-                cython-mode dante define-word devdocs diff-hl diminish
+                cython-mode define-word devdocs diff-hl diminish
                 dired-quick-sort disaster dotenv-mode drag-stuff dumb-jump dune
                 elisp-def elisp-demos elisp-slime-nav emmet-mode emr eval-sexp-fu
                 evil-anzu evil-args evil-cleverparens evil-collection
@@ -994,16 +991,16 @@ This function is called at the very end of Spacemacs initialization."
                 evil-lisp-state evil-matchit evil-nerd-commenter evil-numbers
                 evil-surround evil-textobj-line evil-tutor evil-unimpaired
                 evil-visual-mark-mode evil-visualstar expand-region eyebrowse
-                fancy-battery flx-ido flycheck-elsa flycheck-haskell
+                fancy-battery flx-ido flycheck-elsa
                 flycheck-package flycheck-pos-tip flycheck-rtags flycheck-ycmd
                 gendoxy gh-md golden-ratio google-c-style google-translate
-                groovy-imports groovy-mode haskell-snippets helm-make hide-comnt
+                groovy-imports groovy-mode helm-make hide-comnt
                 highlight-indentation highlight-numbers highlight-parentheses
-                hindent hl-todo hlint-refactor holy-mode hungry-delete hybrid-mode
+                hl-todo holy-mode hungry-delete hybrid-mode
                 impatient-mode importmagic indent-guide info+ inspector ivy-avy
                 ivy-hydra ivy-purpose ivy-rtags ivy-xref ivy-yasnippet js-doc
                 js2-refactor json-mode json-navigator json-reformat link-hint
-                live-py-mode livid-mode lorem-ipsum lsp-haskell lsp-ivy lsp-java
+                live-py-mode livid-mode lorem-ipsum lsp-ivy lsp-java
                 lsp-origami lsp-pyright lsp-ui macrostep markdown-toc
                 maven-test-mode merlin-company merlin-eldoc merlin-iedit
                 multi-line mvn mwim nameless nodejs-repl nose npm-mode ocamlformat
