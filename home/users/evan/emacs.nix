@@ -11,8 +11,13 @@
 in {
   programs.emacs = {
     enable = true;
-    # Native-compiled, pure GTK build (proper Wayland support for GNOME/niri).
-    package = pkgs.emacs-pgtk;
+    # Linux: native-compiled, pure GTK build (proper Wayland support for
+    # GNOME/niri). macOS: the Mac port (native Cocoa integration, smooth
+    # scrolling, proper fullscreen).
+    package =
+      if pkgs.stdenv.hostPlatform.isDarwin
+      then pkgs.emacs-macport
+      else pkgs.emacs-pgtk;
     # Packages that need native bits are provided by nix rather than built by
     # package.el (which fails or is fiddly on NixOS). Spacemacs sees them as
     # already installed.
@@ -60,7 +65,6 @@ in {
     rust-analyzer
     rustfmt
     clippy
-    haskell-language-server
     zls
     pyright
     python3Packages.yapf
