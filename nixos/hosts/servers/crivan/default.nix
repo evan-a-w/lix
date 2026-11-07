@@ -23,6 +23,10 @@
   services.displayManager.defaultSession = lib.mkForce "gnome";
   programs.niri.enable = lib.mkForce false;
 
+  # Wake-on-LAN (magic packet) on the onboard Realtek NIC.
+  # Also needs BIOS: APM > ErP Ready off, Power On By PCI-E on.
+  networking.interfaces.enp4s0.wakeOnLan.enable = true;
+
   # Daemon for Piper (mouse DPI/buttons config)
   services.ratbagd.enable = true;
 
