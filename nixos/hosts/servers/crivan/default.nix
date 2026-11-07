@@ -8,6 +8,9 @@
 ../../../modules/nvidia.nix
   ];
 
+  # The prigh tool host runs as evan, in /home/evan.
+  prigh-worker.user = "evan";
+
   # Bootloader: GRUB in UEFI mode, installed to the EFI partition at /boot,
   # so no disk device (/dev/sda etc.) is needed.
   boot.loader.systemd-boot.enable = false;
