@@ -6,6 +6,7 @@
     ../../modules/gui.nix
     ../../modules/logitech-remap.nix
     ../../modules/users/lloyd.nix
+    ../../modules/prigh-worker.nix
   ];
 
   # For nfs
