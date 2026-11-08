@@ -28,6 +28,7 @@ in {
     {
       desktop = mkHost "x86_64-linux" [./hosts/desktop];
       laptop = mkHost "x86_64-linux" [./hosts/laptop];
+      wsl = mkHost "x86_64-linux" [./hosts/wsl];
     }
     // servers;
 }
