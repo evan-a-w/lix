@@ -8,6 +8,9 @@
   # Non-NixOS fixes: XDG_DATA_DIRS, terminfo, locale archive, etc.
   targets.genericLinux.enable = true;
 
+  # The home-manager CLI (on NixOS, users/evan.nix installs it system-wide)
+  programs.home-manager.enable = true;
+
   # home-manager owns ~/.zshenv, so it has to load Nix itself (this replaces
   # the line the Nix installer added to the old ~/.zshenv).
   programs.zsh.envExtra = ''
